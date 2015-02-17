@@ -104,7 +104,7 @@ define(function (require, exports, module) {
             postObject.body = $("#pfb-push-body").val();
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "https://api.pushbullet.com/v2/pushes", false);
-//            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.setRequestHeader("Content-Type", "application/json");
             xhr.setRequestHeader("Authorization", "Bearer " + accessToken);
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
@@ -112,7 +112,7 @@ define(function (require, exports, module) {
                 }
             }
             console.log("postObject", postObject);
-            xhr.send(postObject);
+            xhr.send(JSON.stringify(postObject));
         });
     }
 
