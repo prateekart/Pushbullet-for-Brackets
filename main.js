@@ -16,7 +16,10 @@ define(function (require, exports, module) {
     var tokenDialogTemplate = require("text!./templates/token-dialog.html"),
         pushDialogTemplate = require("text!./templates/push-dialog.html");
 
-    var userDataFile;
+    var dataDir = brackets.app.getUserDocumentsDirectory() + '/Pushbullet for Brackets/';
+    var accessTokenFile, userDataFile;
+    accessTokenFile = dataDir + 'accessToken';
+    userDataFile = dataDir + 'me';
     var userData;
 
     var tokenDialog, pushDialog;
@@ -24,20 +27,18 @@ define(function (require, exports, module) {
     ExtensionUtils.loadStyleSheet(module, "styles/style.css");
 
     function checkForAccessToken() {
-        var dir = brackets.app.getUserDocumentsDirectory() + '/Pushbullet for Brackets/';
-        userDataFile = dir + 'userData.json';
-        dir = FileSystem.getDirectoryForPath(dir);
+        var dir = FileSystem.getDirectoryForPath(dataDir);
         console.log('dir', dir);
         dir.create();
-        userDataFile = FileSystem.getFileForPath(userDataFile);
+        accessTokenFile = FileSystem.getFileForPath(accessTokenFile);
         console.log("userDataFile", userDataFile);
-        var readAccessToken = FileUtils.readAsText(userDataFile);
-        readAccessToken.done(function (userData) {
-                console.log("accessToken read succesfully", userData);
+        var readAccessToken = FileUtils.readAsText(accessTokenFile);
+        readAccessToken.done(function (accessToken) {
+                console.log("accessTokenFile read succesfully", accessToken);
                 showPushDialog();
             })
             .fail(function (error) {
-                console.log("Error in reading userDataFile", error);
+                console.log("Error in reading accessTokenFile", error);
                 if (error == "NotFound") {
                     showAccessTokenDialog();
                 }
@@ -50,17 +51,24 @@ define(function (require, exports, module) {
         $tokenDialog.on("click", "#pfb-token-save", function () {
             var accessTokenInput = $("#pfb-accessTokenInput").val();
             console.log("Save token clicked", accessTokenInput);
-            tokenDialog.close();
-             showPushDialog();
-            //            var xhr = new XMLHttpRequest()
-            //            xhr.open("GET", "https://api.pushbullet.com/v2/users/me", false)
-            //            xhr.setRequestHeader("Authorization", "Bearer <your_access_token_here>")
-            //            xhr.send()
-            //            console.log(xhr)
-            var write = FileUtils.writeText(userDataFile, '{"name": "user"}');
-            write.fail(function (error) {
-                alert("Failed to save access token to file", error);
-            });
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "https://api.pushbullet.com/v2/users/me", false);
+            xhr.setRequestHeader("Authorization", "Bearer " + accessTokenInput);
+            xhr.onreadystatechange = function () {
+                console.log(xhr.response);
+                userDataFile = FileSystem.getFileForPath(userDataFile);
+                var writeUserData = FileUtils.writeText(userDataFile, xhr.response);
+                writeUserData.done(function () {
+                    var writeAccessToken = FileUtils.writeText(accessTokenFile, accessTokenInput);
+                    writeAccessToken.done(function () {
+                        tokenDialog.close();
+                        showPushDialog();
+                    });
+                }).fail(function (error) {
+                    console.log("Failed to save access token to file", error);
+                });
+            };
+            xhr.send();
         });
     }
 
