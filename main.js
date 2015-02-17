@@ -16,14 +16,17 @@ define(function (require, exports, module) {
     var tokenDialogTemplate = require("text!./templates/token-dialog.html"),
         pushDialogTemplate = require("text!./templates/push-dialog.html");
 
+    //data files
     var dataDir = brackets.app.getUserDocumentsDirectory() + '/Pushbullet for Brackets/';
     var accessTokenFile = dataDir + 'accessToken',
         userDataFile = dataDir + 'me';
     accessTokenFile = FileSystem.getFileForPath(accessTokenFile);
     userDataFile = FileSystem.getFileForPath(userDataFile);
 
+    //data 
     var userData, accessToken;
 
+    //dialogs
     var tokenDialog, pushDialog;
 
     ExtensionUtils.loadStyleSheet(module, "styles/style.css");
@@ -39,10 +42,9 @@ define(function (require, exports, module) {
         dir.create();
         console.log("userDataFile", userDataFile);
         var readAccessToken = FileUtils.readAsText(accessTokenFile);
-        readAccessToken.done(function (token) {
+        return readAccessToken.done(function (token) {
                 console.log("accessTokenFile read succesfully", token);
                 accessToken = token;
-                showPushDialog();
             })
             .fail(function (error) {
                 console.log("Error in reading accessTokenFile", error);
@@ -68,7 +70,7 @@ define(function (require, exports, module) {
             xhr.open("GET", "https://api.pushbullet.com/v2/users/me", false);
             xhr.setRequestHeader("Authorization", "Bearer " + accessTokenInput);
             xhr.onreadystatechange = function () {
-                if (xhr.readyState == 4 && xhr.status == 200) {
+                if (xhr.readyState === 4 && xhr.status === 200) {
                     console.log(xhr.response);
                     userData = xhr.response;
                     var writeUserData = FileUtils.writeText(userDataFile, xhr.response);
@@ -76,7 +78,6 @@ define(function (require, exports, module) {
                         var writeAccessToken = FileUtils.writeText(accessTokenFile, accessTokenInput);
                         writeAccessToken.done(function () {
                             tokenDialog.close();
-                            showPushDialog();
                         });
                     }).fail(function (error) {
                         console.log("Failed to save access token to file", error);
@@ -97,6 +98,7 @@ define(function (require, exports, module) {
     function handle() {
         console.log("Pressed Ctrl Shift P");
         checkForAccessToken();
+        showPushDialog();
     }
 
     AppInit.appReady(function () {
