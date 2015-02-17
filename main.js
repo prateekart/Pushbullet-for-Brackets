@@ -17,24 +17,31 @@ define(function (require, exports, module) {
         pushDialogTemplate = require("text!./templates/push-dialog.html");
 
     var dataDir = brackets.app.getUserDocumentsDirectory() + '/Pushbullet for Brackets/';
-    var accessTokenFile, userDataFile;
-    accessTokenFile = dataDir + 'accessToken';
-    userDataFile = dataDir + 'me';
-    var userData;
+    var accessTokenFile = dataDir + 'accessToken',
+        userDataFile = dataDir + 'me';
+    accessTokenFile = FileSystem.getFileForPath(accessTokenFile);
+    userDataFile = FileSystem.getFileForPath(userDataFile);
+
+    var userData, accessToken;
 
     var tokenDialog, pushDialog;
 
     ExtensionUtils.loadStyleSheet(module, "styles/style.css");
 
+    /*
+     * read access token from file
+     * if exists, show push dialog
+     * else show access token dialog
+     */
     function checkForAccessToken() {
         var dir = FileSystem.getDirectoryForPath(dataDir);
         console.log('dir', dir);
         dir.create();
-        accessTokenFile = FileSystem.getFileForPath(accessTokenFile);
         console.log("userDataFile", userDataFile);
         var readAccessToken = FileUtils.readAsText(accessTokenFile);
-        readAccessToken.done(function (accessToken) {
-                console.log("accessTokenFile read succesfully", accessToken);
+        readAccessToken.done(function (token) {
+                console.log("accessTokenFile read succesfully", token);
+                accessToken = token;
                 showPushDialog();
             })
             .fail(function (error) {
@@ -45,6 +52,12 @@ define(function (require, exports, module) {
             });
     }
 
+    /*
+     * take access token input
+     * on save, GET user data
+     * GET success: save user data and show push dialog
+     * GET error: show error message
+     */
     function showAccessTokenDialog() {
         tokenDialog = Dialogs.showModalDialogUsingTemplate($(tokenDialogTemplate));
         var $tokenDialog = tokenDialog.getElement();
@@ -55,18 +68,22 @@ define(function (require, exports, module) {
             xhr.open("GET", "https://api.pushbullet.com/v2/users/me", false);
             xhr.setRequestHeader("Authorization", "Bearer " + accessTokenInput);
             xhr.onreadystatechange = function () {
-                console.log(xhr.response);
-                userDataFile = FileSystem.getFileForPath(userDataFile);
-                var writeUserData = FileUtils.writeText(userDataFile, xhr.response);
-                writeUserData.done(function () {
-                    var writeAccessToken = FileUtils.writeText(accessTokenFile, accessTokenInput);
-                    writeAccessToken.done(function () {
-                        tokenDialog.close();
-                        showPushDialog();
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    console.log(xhr.response);
+                    userData = xhr.response;
+                    var writeUserData = FileUtils.writeText(userDataFile, xhr.response);
+                    writeUserData.done(function () {
+                        var writeAccessToken = FileUtils.writeText(accessTokenFile, accessTokenInput);
+                        writeAccessToken.done(function () {
+                            tokenDialog.close();
+                            showPushDialog();
+                        });
+                    }).fail(function (error) {
+                        console.log("Failed to save access token to file", error);
                     });
-                }).fail(function (error) {
-                    console.log("Failed to save access token to file", error);
-                });
+                } else {
+                    console.log("invalid access token");
+                }
             };
             xhr.send();
         });
@@ -76,7 +93,7 @@ define(function (require, exports, module) {
         pushDialog = Dialogs.showModalDialogUsingTemplate($(pushDialogTemplate));
     }
 
-    // Function to run when the menu item is clicked
+    // Function to run when the menu item is clicked or shortcut is used
     function handle() {
         console.log("Pressed Ctrl Shift P");
         checkForAccessToken();
