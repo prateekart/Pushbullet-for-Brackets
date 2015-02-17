@@ -71,6 +71,7 @@ define(function (require, exports, module) {
             xhr.setRequestHeader("Authorization", "Bearer " + accessTokenInput);
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
+                    accessToken = accessTokenInput;
                     console.log(xhr.response);
                     userData = xhr.response;
                     var writeUserData = FileUtils.writeText(userDataFile, xhr.response);
@@ -92,9 +93,29 @@ define(function (require, exports, module) {
 
     function showPushDialog() {
         pushDialog = Dialogs.showModalDialogUsingTemplate($(pushDialogTemplate));
-        pushDialog = pushDialog.getElement();
-        $tokenDialog.on("click", "#pfb-push-push", function () {});
+        var $pushDialog = pushDialog.getElement();
+        $pushDialog.on("click", "#pfb-push-push", function () {
+            var postObject = {
+                "type": "note",
+                "title": "",
+                "body": ""
+            };
+            postObject.title = $("#pfb-push-title").val();
+            postObject.body = $("#pfb-push-body").val();
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "https://api.pushbullet.com/v2/pushes", false);
+//            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.setRequestHeader("Authorization", "Bearer " + accessToken);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    console.log(xhr.response);
+                }
+            }
+            console.log("postObject", postObject);
+            xhr.send(postObject);
+        });
     }
+
 
     // Function to run when the menu item is clicked or shortcut is used
     function handle() {
