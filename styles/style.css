@@ -28,7 +28,7 @@
     text-align: right;
 }
 
-input[type="text"] {
+.pfb-input {
     display: block;
     color: #95a5a6 !important;
     border-color: #d5dbdb;
