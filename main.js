@@ -3,14 +3,20 @@ define(function (require, exports, module) {
 
     var AppInit = brackets.getModule("utils/AppInit"),
         CommandManager = brackets.getModule("command/CommandManager"),
+        Dialogs = brackets.getModule("widgets/Dialogs"),
         ExtensionUtils = brackets.getModule("utils/ExtensionUtils"),
         KeyBindingManager = brackets.getModule('command/KeyBindingManager'),
         Menus = brackets.getModule("command/Menus"),
         PanelManager = brackets.getModule("view/PanelManager");
 
+    var tokenDialogTemplate = require('text!./templates/token-dialog.html');
+    
+    ExtensionUtils.loadStyleSheet(module, "styles/style.css");
+
     // Function to run when the menu item is clicked
     function handle() {
         console.log("Pressed Ctrl Shift P");
+        var tokenDialog = Dialogs.showModalDialogUsingTemplate($(tokenDialogTemplate));
     }
 
     AppInit.appReady(function () {
