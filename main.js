@@ -13,12 +13,13 @@ define(function (require, exports, module) {
         PanelManager = brackets.getModule("view/PanelManager");
 
     //templates
-    var tokenDialogTemplate = require('text!./templates/token-dialog.html');
+    var tokenDialogTemplate = require("text!./templates/token-dialog.html"),
+        pushDialogTemplate = require("text!./templates/push-dialog.html");
 
     var userDataFile;
     var userData;
-    
-    var tokenDialog;
+
+    var tokenDialog, pushDialog;
 
     ExtensionUtils.loadStyleSheet(module, "styles/style.css");
 
@@ -33,6 +34,7 @@ define(function (require, exports, module) {
         var readAccessToken = FileUtils.readAsText(userDataFile);
         readAccessToken.done(function (userData) {
                 console.log("accessToken read succesfully", userData);
+                showPushDialog();
             })
             .fail(function (error) {
                 console.log("Error in reading userDataFile", error);
@@ -49,16 +51,21 @@ define(function (require, exports, module) {
             var accessTokenInput = $("#pfb-accessTokenInput").val();
             console.log("Save token clicked", accessTokenInput);
             tokenDialog.close();
-            var xhr = new XMLHttpRequest()
-                //            xhr.open("GET", "https://api.pushbullet.com/v2/users/me", false)
-                //            xhr.setRequestHeader("Authorization", "Bearer <your_access_token_here>")
-                //            xhr.send()
-                //            console.log(xhr)
+             showPushDialog();
+            //            var xhr = new XMLHttpRequest()
+            //            xhr.open("GET", "https://api.pushbullet.com/v2/users/me", false)
+            //            xhr.setRequestHeader("Authorization", "Bearer <your_access_token_here>")
+            //            xhr.send()
+            //            console.log(xhr)
             var write = FileUtils.writeText(userDataFile, '{"name": "user"}');
             write.fail(function (error) {
                 alert("Failed to save access token to file", error);
             });
         });
+    }
+
+    function showPushDialog() {
+        pushDialog = Dialogs.showModalDialogUsingTemplate($(pushDialogTemplate));
     }
 
     // Function to run when the menu item is clicked
