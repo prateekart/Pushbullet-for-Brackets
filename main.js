@@ -92,6 +92,8 @@ define(function (require, exports, module) {
 
     function showPushDialog() {
         pushDialog = Dialogs.showModalDialogUsingTemplate($(pushDialogTemplate));
+        pushDialog = pushDialog.getElement();
+        $tokenDialog.on("click", "#pfb-push-push", function () {});
     }
 
     // Function to run when the menu item is clicked or shortcut is used

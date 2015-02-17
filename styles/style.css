@@ -29,7 +29,7 @@
 }
 
 .pfb-input {
-    display: block;
+    display: block !important;
     color: #95a5a6 !important;
     border-color: #d5dbdb;
     background-color: #f4f6f6 !important;
