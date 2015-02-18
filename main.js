@@ -10,7 +10,8 @@ define(function (require, exports, module) {
         FileUtils = brackets.getModule("file/FileUtils"),
         KeyBindingManager = brackets.getModule('command/KeyBindingManager'),
         Menus = brackets.getModule("command/Menus"),
-        PanelManager = brackets.getModule("view/PanelManager");
+        PanelManager = brackets.getModule("view/PanelManager"),
+        launcher = brackets.getModule("LiveDevelopment/MultiBrowserImpl/launchers/Launcher");
 
     //templates
     var tokenDialogTemplate = require("text!./templates/token-dialog.html"),
@@ -120,6 +121,7 @@ define(function (require, exports, module) {
     // Function to run when the menu item is clicked or shortcut is used
     function handle() {
         console.log("Pressed Ctrl Shift P");
+        launcher.launch("http://www.google.com");
         checkForAccessToken();
         showPushDialog();
     }
