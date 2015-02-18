@@ -24,7 +24,7 @@ define(function (require, exports, module) {
         contactsFile = dataDir + 'contacts';
     accessTokenFile = FileSystem.getFileForPath(accessTokenFile);
     userDataFile = FileSystem.getFileForPath(userDataFile);
-    contactsFile =  FileSystem.getFileForPath(contactsFile);
+    contactsFile = FileSystem.getFileForPath(contactsFile);
 
     //data 
     var userData, accessToken, contacts;
@@ -57,26 +57,31 @@ define(function (require, exports, module) {
                 }
             });
     }
-    
+
     function syncContacts() {
         var xhr = new XMLHttpRequest();
-            xhr.open("GET", "https://api.pushbullet.com/v2/contacts", false);
-            xhr.setRequestHeader("Authorization", "Bearer " + accessToken);
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    contacts = JSON.parse(xhr.response).contacts;
-                    console.log("received contacts", contacts);
-                    var writeContacts = FileUtils.writeText(contactsFile, JSON.stringify(contacts));
-                    writeContacts.done(function () {
-                        console.log("contact sync complete");
-                    }).fail(function (error) {
-                        console.log("contact write to file", error);
-                    });
-                } else {
-                     console.log("contact sync failed", xhr);
+        xhr.open("GET", "https://api.pushbullet.com/v2/contacts", false);
+        xhr.setRequestHeader("Authorization", "Bearer " + accessToken);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                contacts = JSON.parse(xhr.response).contacts;
+                console.log("received contacts", contacts);
+                var writeContacts = FileUtils.writeText(contactsFile, JSON.stringify(contacts));
+                writeContacts.done(function () {
+                    console.log("contact sync complete");
+                }).fail(function (error) {
+                    console.log("contact write to file", error);
+                });
+                var listItems = "";
+                for (var i = 0; i < contacts.length; i++) {
+                    listItems += "<option value='" + contacts[i].email + "'>" + contacts[i].name + "</option>";
                 }
-            };
-            xhr.send();
+                $("#pfb-push-to").html(listItems);
+            } else {
+                console.log("contact sync failed", xhr);
+            }
+        };
+        xhr.send();
     }
 
     /*
