@@ -14,6 +14,7 @@
     color: #000000;
     background-color: #ffffff;
     padding: 5px 15px 15px 15px;
+    position: relative;
 }
 
 .pfb-dialog-button {
@@ -33,4 +34,49 @@
     color: #95a5a6 !important;
     border-color: #d5dbdb;
     background-color: #f4f6f6 !important;
+}
+
+.pfb-dialog-body__loader__bg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.71);
+}
+
+.pfb-dialog-body__loader {
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    top: 48px;
+    left: 0;
+    margin: auto;
+    right: 0;
+    border-radius: 50%;
+    border-top: 3px solid #4AB367;
+    -webkit-animation: load8 1.1s infinite linear;
+    animation: load8 1.1s infinite linear;
+}
+
+@-webkit-keyframes load8 {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes load8 {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
 }

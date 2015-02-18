@@ -77,8 +77,10 @@ define(function (require, exports, module) {
                     listItems += "<option value='" + contacts[i].email + "'>" + contacts[i].name + "</option>";
                 }
                 $("#pfb-push-to").html(listItems);
+                $(".pfb-dialog-body__loader__bg").hide();
             } else {
                 console.log("contact sync failed", xhr);
+                $(".pfb-dialog-body__loader__bg").hide();
             }
         };
         xhr.send();
@@ -92,9 +94,13 @@ define(function (require, exports, module) {
      */
     function showAccessTokenDialog() {
         tokenDialog = Dialogs.showModalDialogUsingTemplate($(tokenDialogTemplate));
+        $(".pfb-dialog-body__loader__bg").hide();
+        $("#pfb-token-invalidToken").hide();
         var $tokenDialog = tokenDialog.getElement();
         $tokenDialog.on("click", "#pfb-token-save", function () {
-            var accessTokenInput = $("#pfb-accessTokenInput").val();
+            $("#pfb-token-invalidToken").hide();
+            $(".pfb-dialog-body__loader__bg").show();
+            var accessTokenInput = $("#pfb-token-accessTokenInput").val();
             console.log("Save token clicked", accessTokenInput);
             var xhr = new XMLHttpRequest();
             xhr.open("GET", "https://api.pushbullet.com/v2/users/me", false);
@@ -113,8 +119,11 @@ define(function (require, exports, module) {
                     }).fail(function (error) {
                         console.log("Failed to save access token to file", error);
                     });
+                    syncContacts();
                 } else {
                     console.log("invalid access token");
+                    $(".pfb-dialog-body__loader__bg").hide();
+                    $("#pfb-token-invalidToken").show();
                 }
             };
             xhr.send();
