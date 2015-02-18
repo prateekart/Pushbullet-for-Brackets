@@ -39,7 +39,7 @@ define(function (require, exports, module) {
      * if exists, show push dialog
      * else show access token dialog
      */
-    function checkForAccessToken() {
+    function checkForAccessToken(openPush) {
         var dir = FileSystem.getDirectoryForPath(dataDir);
         console.log('dir', dir);
         dir.create();
@@ -48,17 +48,17 @@ define(function (require, exports, module) {
         readAccessToken.done(function (token) {
                 console.log("accessTokenFile read succesfully", token);
                 accessToken = token;
-                syncContacts();
+                syncContacts(openPush);
             })
             .fail(function (error) {
                 console.log("Error in reading accessTokenFile", error);
                 if (error == "NotFound") {
-                    showAccessTokenDialog();
+                    showAccessTokenDialog(openPush);
                 }
             });
     }
 
-    function syncContacts() {
+    function syncContacts(openPush) {
         var xhr = new XMLHttpRequest();
         xhr.open("GET", "https://api.pushbullet.com/v2/contacts", false);
         xhr.setRequestHeader("Authorization", "Bearer " + accessToken);
@@ -66,18 +66,15 @@ define(function (require, exports, module) {
             if (xhr.readyState === 4 && xhr.status === 200) {
                 contacts = JSON.parse(xhr.response).contacts;
                 console.log("received contacts", contacts);
-//                var writeContacts = FileUtils.writeText(contactsFile, JSON.stringify(contacts));
-//                writeContacts.done(function () {
-//                    console.log("contact sync complete");
-//                }).fail(function (error) {
-//                    console.log("contact write to file", error);
-//                });
-                var listItems = "";
-                for (var i = 0; i < contacts.length; i++) {
-                    listItems += "<option value='" + contacts[i].email + "'>" + contacts[i].name + "</option>";
-                }
-                $("#pfb-push-to").html(listItems);
+                //                var writeContacts = FileUtils.writeText(contactsFile, JSON.stringify(contacts));
+                //                writeContacts.done(function () {
+                //                    console.log("contact sync complete");
+                //                }).fail(function (error) {
+                //                    console.log("contact write to file", error);
+                //                });
                 $(".pfb-dialog-body__loader__bg").hide();
+                if (openPush) showPushDialog();
+
             } else {
                 console.log("contact sync failed", xhr);
                 $(".pfb-dialog-body__loader__bg").hide();
@@ -92,7 +89,7 @@ define(function (require, exports, module) {
      * GET success: save user data and show push dialog
      * GET error: show error message
      */
-    function showAccessTokenDialog() {
+    function showAccessTokenDialog(openPush) {
         tokenDialog = Dialogs.showModalDialogUsingTemplate($(tokenDialogTemplate));
         $(".pfb-dialog-body__loader__bg").hide();
         $("#pfb-token-invalidToken").hide();
@@ -119,7 +116,7 @@ define(function (require, exports, module) {
                     }).fail(function (error) {
                         console.log("Failed to save access token to file", error);
                     });
-                    syncContacts();
+                    syncContacts(openPush);
                 } else {
                     console.log("invalid access token");
                     $(".pfb-dialog-body__loader__bg").hide();
@@ -132,6 +129,11 @@ define(function (require, exports, module) {
 
     function showPushDialog() {
         pushDialog = Dialogs.showModalDialogUsingTemplate($(pushDialogTemplate));
+        var listItems = "";
+        for (var i = 0; i < contacts.length; i++) {
+            listItems += "<option value='" + contacts[i].email + "'>" + contacts[i].name + "</option>";
+        }
+        $("#pfb-push-to").html(listItems);
         var $pushDialog = pushDialog.getElement();
         $pushDialog.on("click", "#pfb-push-push", function () {
             var postObject = {
@@ -163,8 +165,7 @@ define(function (require, exports, module) {
     function handle() {
         console.log("Pressed Ctrl Shift P");
         //        launcher.launch("http://www.google.com");
-        checkForAccessToken();
-        showPushDialog();
+        checkForAccessToken(true);
     }
 
     AppInit.appReady(function () {
@@ -179,7 +180,7 @@ define(function (require, exports, module) {
         menu.addMenuItem(MY_COMMAND_ID);
 
         KeyBindingManager.addBinding(MY_COMMAND_ID, "Ctrl-Shift-P");
-        checkForAccessToken();
+        checkForAccessToken(false);
     });
 
 
