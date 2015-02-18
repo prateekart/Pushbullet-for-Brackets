@@ -20,12 +20,14 @@ define(function (require, exports, module) {
     //data files
     var dataDir = brackets.app.getUserDocumentsDirectory() + '/Pushbullet for Brackets/';
     var accessTokenFile = dataDir + 'accessToken',
-        userDataFile = dataDir + 'me';
+        userDataFile = dataDir + 'me',
+        contactsFile = dataDir + 'contacts';
     accessTokenFile = FileSystem.getFileForPath(accessTokenFile);
     userDataFile = FileSystem.getFileForPath(userDataFile);
+    contactsFile =  FileSystem.getFileForPath(contactsFile);
 
     //data 
-    var userData, accessToken;
+    var userData, accessToken, contacts;
 
     //dialogs
     var tokenDialog, pushDialog;
@@ -43,9 +45,10 @@ define(function (require, exports, module) {
         dir.create();
         console.log("userDataFile", userDataFile);
         var readAccessToken = FileUtils.readAsText(accessTokenFile);
-        return readAccessToken.done(function (token) {
+        readAccessToken.done(function (token) {
                 console.log("accessTokenFile read succesfully", token);
                 accessToken = token;
+                syncContacts();
             })
             .fail(function (error) {
                 console.log("Error in reading accessTokenFile", error);
@@ -53,6 +56,27 @@ define(function (require, exports, module) {
                     showAccessTokenDialog();
                 }
             });
+    }
+    
+    function syncContacts() {
+        var xhr = new XMLHttpRequest();
+            xhr.open("GET", "https://api.pushbullet.com/v2/contacts", false);
+            xhr.setRequestHeader("Authorization", "Bearer " + accessToken);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    contacts = JSON.parse(xhr.response).contacts;
+                    console.log("received contacts", contacts);
+                    var writeContacts = FileUtils.writeText(contactsFile, JSON.stringify(contacts));
+                    writeContacts.done(function () {
+                        console.log("contact sync complete");
+                    }).fail(function (error) {
+                        console.log("contact write to file", error);
+                    });
+                } else {
+                     console.log("contact sync failed", xhr);
+                }
+            };
+            xhr.send();
     }
 
     /*
@@ -121,7 +145,7 @@ define(function (require, exports, module) {
     // Function to run when the menu item is clicked or shortcut is used
     function handle() {
         console.log("Pressed Ctrl Shift P");
-        launcher.launch("http://www.google.com");
+        //        launcher.launch("http://www.google.com");
         checkForAccessToken();
         showPushDialog();
     }
@@ -138,8 +162,8 @@ define(function (require, exports, module) {
         menu.addMenuItem(MY_COMMAND_ID);
 
         KeyBindingManager.addBinding(MY_COMMAND_ID, "Ctrl-Shift-P");
+        checkForAccessToken();
     });
-
 
 
 });
