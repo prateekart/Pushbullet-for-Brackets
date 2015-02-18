@@ -132,6 +132,9 @@ define(function (require, exports, module) {
             };
             postObject.title = $("#pfb-push-title").val();
             postObject.body = $("#pfb-push-body").val();
+            var toEmail = $("#pfb-push-to").val();
+            console.log("toEmail", toEmail);
+            postObject.email = toEmail;
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "https://api.pushbullet.com/v2/pushes", false);
             xhr.setRequestHeader("Content-Type", "application/json");
