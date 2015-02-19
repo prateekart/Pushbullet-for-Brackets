@@ -48,7 +48,8 @@ define(function (require, exports, module) {
         readAccessToken.done(function (token) {
                 console.log("accessTokenFile read succesfully", token);
                 accessToken = token;
-                syncContacts(openPush);
+                if (openPush) showPushDialog();
+                else syncContacts(openPush);
             })
             .fail(function (error) {
                 console.log("Error in reading accessTokenFile", error);
@@ -63,21 +64,21 @@ define(function (require, exports, module) {
         xhr.open("GET", "https://api.pushbullet.com/v2/contacts", false);
         xhr.setRequestHeader("Authorization", "Bearer " + accessToken);
         xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-                contacts = JSON.parse(xhr.response).contacts;
-                console.log("received contacts", contacts);
-                //                var writeContacts = FileUtils.writeText(contactsFile, JSON.stringify(contacts));
-                //                writeContacts.done(function () {
-                //                    console.log("contact sync complete");
-                //                }).fail(function (error) {
-                //                    console.log("contact write to file", error);
-                //                });
-                $(".pfb-dialog-body__loader__bg").hide();
-                if (openPush) showPushDialog();
-
-            } else {
-                console.log("contact sync failed", xhr);
-                $(".pfb-dialog-body__loader__bg").hide();
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    contacts = JSON.parse(xhr.response).contacts;
+                    console.log("received contacts", contacts);
+                    //                var writeContacts = FileUtils.writeText(contactsFile, JSON.stringify(contacts));
+                    //                writeContacts.done(function () {
+                    //                    console.log("contact sync complete");
+                    //                }).fail(function (error) {
+                    //                    console.log("contact write to file", error);
+                    //                });
+                    if (openPush) showPushDialog();
+                } else {
+                    console.log("contact sync failed", xhr);
+                }
+                 $(".pfb-dialog-body__loader__bg").hide();
             }
         };
         xhr.send();
@@ -107,15 +108,15 @@ define(function (require, exports, module) {
                     accessToken = accessTokenInput;
                     console.log(xhr.response);
                     userData = xhr.response;
-                    var writeUserData = FileUtils.writeText(userDataFile, xhr.response);
-                    writeUserData.done(function () {
-                        var writeAccessToken = FileUtils.writeText(accessTokenFile, accessTokenInput);
-                        writeAccessToken.done(function () {
-                            tokenDialog.close();
-                        });
-                    }).fail(function (error) {
-                        console.log("Failed to save access token to file", error);
-                    });
+//                    var writeUserData = FileUtils.writeText(userDataFile, xhr.response);
+//                    writeUserData.done(function () {
+//                        var writeAccessToken = FileUtils.writeText(accessTokenFile, accessTokenInput);
+//                        writeAccessToken.done(function () {
+//                            tokenDialog.close();
+//                        });
+//                    }).fail(function (error) {
+//                        console.log("Failed to save access token to file", error);
+//                    });
                     syncContacts(openPush);
                 } else {
                     console.log("invalid access token");
