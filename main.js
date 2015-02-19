@@ -159,6 +159,7 @@ define(function (require, exports, module) {
             }
             console.log("postObject", postObject);
             xhr.send(JSON.stringify(postObject));
+            pushDialog.close();
         });
     }
 
