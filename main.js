@@ -78,7 +78,7 @@ define(function (require, exports, module) {
                 } else {
                     console.log("contact sync failed", xhr);
                 }
-                 $(".pfb-dialog-body__loader__bg").hide();
+                $(".pfb-dialog-body__loader__bg").hide();
             }
         };
         xhr.send();
@@ -108,16 +108,17 @@ define(function (require, exports, module) {
                     accessToken = accessTokenInput;
                     console.log(xhr.response);
                     userData = xhr.response;
-//                    var writeUserData = FileUtils.writeText(userDataFile, xhr.response);
-//                    writeUserData.done(function () {
-//                        var writeAccessToken = FileUtils.writeText(accessTokenFile, accessTokenInput);
-//                        writeAccessToken.done(function () {
-//                            tokenDialog.close();
-//                        });
-//                    }).fail(function (error) {
-//                        console.log("Failed to save access token to file", error);
-//                    });
-                    syncContacts(openPush);
+                    //                    var writeUserData = FileUtils.writeText(userDataFile, xhr.response);
+                    //                    writeUserData.done(function () {
+                    var writeAccessToken = FileUtils.writeText(accessTokenFile, accessTokenInput);
+                    writeAccessToken.done(function () {
+                            tokenDialog.close();
+                            syncContacts(openPush);
+                        })
+                        .fail(function (error) {
+                            console.log("Failed to save access token to file", error);
+                        });
+
                 } else {
                     console.log("invalid access token");
                     $(".pfb-dialog-body__loader__bg").hide();
