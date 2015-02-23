@@ -137,18 +137,13 @@ define(function (require, exports, module) {
             listItems += "<option value='" + contacts[i].email + "'>" + contacts[i].name + "</option>";
         }
         $("#pfb-push-to").html(listItems);
-//        var editor = EditorManager.getFocusedEditor();
          var editor = EditorManager.getActiveEditor();
-//        if (editor) {
-//            snippet = editor.getSelectedText();
-//            filetype = editor.getModeForSelection();
         var selectedText = '';
         if(editor && editor.getSelectedText().length>0)
             selectedText = editor.getSelectedText();
-        else selectedText = "No text";
+        else selectedText = "Nothing selected";
         $('#pfb-push-textarea').val(selectedText);
             console.log("editor",selectedText)
-//        }
         var $pushDialog = pushDialog.getElement();
         $pushDialog.on("click", "#pfb-push-push", function () {
             var postObject = {
@@ -157,8 +152,10 @@ define(function (require, exports, module) {
                 "body": ""
             };
             postObject.title = $("#pfb-push-title").val();
-            postObject.body = $("#pfb-push-body").val();
+            postObject.body = $("#pfb-push-textarea").val();
             var toEmail = $("#pfb-push-to").val();
+            
+            pushDialog.close();
             console.log("toEmail", toEmail);
             postObject.email = toEmail;
             var xhr = new XMLHttpRequest();
@@ -172,7 +169,6 @@ define(function (require, exports, module) {
             }
             console.log("postObject", postObject);
             xhr.send(JSON.stringify(postObject));
-            pushDialog.close();
         });
     }
 
