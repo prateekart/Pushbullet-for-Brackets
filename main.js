@@ -5,6 +5,7 @@ define(function (require, exports, module) {
     var AppInit = brackets.getModule("utils/AppInit"),
         CommandManager = brackets.getModule("command/CommandManager"),
         Dialogs = brackets.getModule("widgets/Dialogs"),
+        EditorManager = brackets.getModule("editor/EditorManager"),
         ExtensionUtils = brackets.getModule("utils/ExtensionUtils"),
         FileSystem = brackets.getModule("filesystem/FileSystem"),
         FileUtils = brackets.getModule("file/FileUtils"),
@@ -136,6 +137,18 @@ define(function (require, exports, module) {
             listItems += "<option value='" + contacts[i].email + "'>" + contacts[i].name + "</option>";
         }
         $("#pfb-push-to").html(listItems);
+//        var editor = EditorManager.getFocusedEditor();
+         var editor = EditorManager.getActiveEditor();
+//        if (editor) {
+//            snippet = editor.getSelectedText();
+//            filetype = editor.getModeForSelection();
+        var selectedText = '';
+        if(editor && editor.getSelectedText().length>0)
+            selectedText = editor.getSelectedText();
+        else selectedText = "No text";
+        $('#pfb-push-textarea').val(selectedText);
+            console.log("editor",selectedText)
+//        }
         var $pushDialog = pushDialog.getElement();
         $pushDialog.on("click", "#pfb-push-push", function () {
             var postObject = {
