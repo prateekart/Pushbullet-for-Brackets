@@ -50,7 +50,7 @@ define(function (require, exports, module) {
                 console.log("accessTokenFile read succesfully", token);
                 accessToken = token;
                 if (openPush) showPushDialog();
-                else syncContacts(openPush);
+                else syncContacts();
             })
             .fail(function (error) {
                 console.log("Error in reading accessTokenFile", error);
@@ -192,6 +192,7 @@ define(function (require, exports, module) {
         menu.addMenuItem(MY_COMMAND_ID);
 
         KeyBindingManager.addBinding(MY_COMMAND_ID, "Ctrl-Shift-P");
+        $("<a href='#' id='pbf-toolbar-icon' title='Pushbullet for Brackets!'></a>").appendTo("#main-toolbar div.buttons").on("click", handle);
         checkForAccessToken(false);
     });
 

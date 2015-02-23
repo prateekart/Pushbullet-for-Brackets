@@ -80,3 +80,11 @@
         transform: rotate(360deg);
     }
 }
+
+#pbf-toolbar-icon {
+    content: "";
+    background: url("../images/logo.png") 0 0 no-repeat;
+    width: 24px;
+    height: 24px;
+    background-size: contain;
+}
